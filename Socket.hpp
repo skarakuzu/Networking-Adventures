@@ -11,7 +11,6 @@
 class Socket{
     int socket_fd;
     struct sockaddr_in address;
-    int connection;
 
 public:
     Socket() = default;
@@ -27,7 +26,6 @@ public:
     Socket(int domain, int service, int protocol, u_short port, u_long interface);
 
     int get_socket_fd();
-    int get_connection();
     struct sockaddr_in get_address();
 
     int bind_socket();

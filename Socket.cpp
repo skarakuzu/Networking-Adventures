@@ -15,13 +15,11 @@ Socket& Socket::operator=(Socket&& other) noexcept
     std::cout<<"In move assignmet...\n";
     std::exchange(this->socket_fd, other.socket_fd);
     std::exchange(this->address, other.address);
-    std::exchange(this->connection, other.connection);
 
     other.socket_fd = -1;
     other.address.sin_family = 0;
     other.address.sin_port = 0;
     other.address.sin_addr.s_addr = 0;
-    other.connection = -1;
 
     return *this;
 }
@@ -31,22 +29,16 @@ Socket::Socket(Socket&& other) noexcept
     std::cout<<"In move constructor...\n";
     std::exchange(this->socket_fd, other.socket_fd);
     std::exchange(this->address, other.address);
-    std::exchange(this->connection, other.connection);
 
     other.socket_fd = -1;
     other.address.sin_family = 0;
     other.address.sin_port = 0;
     other.address.sin_addr.s_addr = 0;
-    other.connection = -1;
 }
 
 int Socket::get_socket_fd()
 {
     return socket_fd;
-}
-int Socket::get_connection()
-{
-    return connection;
 }
 
 struct sockaddr_in Socket::get_address()

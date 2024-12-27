@@ -2,6 +2,7 @@
 #define SERVER_HPP
 
 #include "Socket.hpp"
+#include "ThreadPool.hpp"
 
 class Server{
 

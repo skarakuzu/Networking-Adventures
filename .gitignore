@@ -1,0 +1,21 @@
+# CMake generated files
+CMakeCache.txt
+MakeFile
+CMakeFiles/
+cmake-build-debug/
+cmake-build-release/
+*.cmake
+
+# Build artifacts
+build/
+bin/
+*.o
+*.so
+*.dylib
+*.exe
+*.a
+*.dll
+*.lib
+
+# IDE-specific files
+.vscode/

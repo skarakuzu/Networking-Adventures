@@ -13,8 +13,14 @@ void Server::accept_connection()
 
 void Server::handle_connection()
 {
+
     read(client_socket_fd, buffer, 30000);
+    std::cout<<"The working thread is with ID: "<< std::this_thread::get_id()<<" with socket ID: "<<client_socket_fd<<std::endl;
+
     std::cout<< buffer <<std::endl;
+
+    char * hello = "Hello from server";
+    write(client_socket_fd, hello, strlen(hello));
 }
 
 void Server::respond_to_connection()
@@ -25,13 +31,16 @@ void Server::respond_to_connection()
 
 void Server::launch_server()
 {
+    Threadpool<std::packaged_task<void()>> tp;
+
     while(true)
     {
         std::cout<<"=======waiting======\n";
 
         accept_connection();
-        handle_connection();
-        respond_to_connection();
+        tp.submit(std::packaged_task<void()>([this]{return handle_connection();}));
+        //handle_connection();
+        //respond_to_connection();
         std::cout<<"=======done=========\n";
     }
 }
