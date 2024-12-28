@@ -6,7 +6,7 @@
 #include<netinet/in.h>
 #include<unistd.h>
 #include<iostream>
-
+#include <csignal>
 
 class Socket{
     int socket_fd;
@@ -33,6 +33,7 @@ public:
     int listen_socket(int backlog);
     int accept_connection();
     int close_socket();
+
 
     ~Socket();
 };

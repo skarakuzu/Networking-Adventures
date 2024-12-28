@@ -13,12 +13,13 @@ void Server::accept_connection()
 
 void Server::handle_connection()
 {
+    //char buffer[30000] ={0};
+    std::string buffer(30000, '\0');
 
-    read(client_socket_fd, buffer, 30000);
+    read(client_socket_fd, buffer.data(), buffer.size()-1);
     std::cout<<"The working thread is with ID: "<< std::this_thread::get_id()<<" with socket ID: "<<client_socket_fd<<std::endl;
 
-    HTTPRequest req(buffer);
-    req.parser();
+    request.parser(buffer);
 
     std::cout<< buffer <<std::endl;
 
@@ -32,11 +33,25 @@ void Server::respond_to_connection()
      write(client_socket_fd, hello, strlen(hello));
 }
 
+void Server::shut_down()
+{
+    std::cout<<"!!!!!!!!!!! SHUTTING DOWN THE SERVER !!!!!!!!!!!\n";
+    interrupted = 1;
+    server_socket->close_socket();
+    std::terminate;
+}
+
+
+bool Server::get_interrupt_stat()
+{
+    return interrupted;
+}
+
 void Server::launch_server()
 {
     Threadpool<std::packaged_task<void()>> tp;
 
-    while(true)
+    while(!get_interrupt_stat())
     {
         std::cout<<"=======waiting======\n";
 

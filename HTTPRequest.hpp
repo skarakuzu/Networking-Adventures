@@ -4,6 +4,7 @@
 #include<iostream>
 #include<map>
 #include <sstream>
+#include<string_view>
 
 /*
 GET /index.html HTTP/1.1
@@ -22,17 +23,11 @@ Connection: keep-alive
 
 class HTTPRequest
 {
-    std::map<std::string, std::string> request_map;
-    std::map<std::string, std::string> body_map;
-    std::string request_str;
-    std::string method;
-    std::string url;
+    void parse_body(std::string& str, std::map<std::string, std::string>& body_map);
 
 public:
-    HTTPRequest(const char *s) : request_str(std::string(s)){}
 
-    void parser();
-
+    void parser(std::string& str);
 };
 
 #endif
