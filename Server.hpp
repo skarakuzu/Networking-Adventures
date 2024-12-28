@@ -3,12 +3,14 @@
 
 #include "Socket.hpp"
 #include "ThreadPool.hpp"
+#include "HTTPRequest.hpp"
 
 class Server{
 
     int client_socket_fd;
     std::unique_ptr<Socket> server_socket;
     char buffer[30000] = {0};
+    //std::string buffer;
 
     void accept_connection();
     void handle_connection();

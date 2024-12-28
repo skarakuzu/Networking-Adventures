@@ -17,6 +17,9 @@ void Server::handle_connection()
     read(client_socket_fd, buffer, 30000);
     std::cout<<"The working thread is with ID: "<< std::this_thread::get_id()<<" with socket ID: "<<client_socket_fd<<std::endl;
 
+    HTTPRequest req(buffer);
+    req.parser();
+
     std::cout<< buffer <<std::endl;
 
     char * hello = "Hello from server";

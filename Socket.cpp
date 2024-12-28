@@ -8,6 +8,7 @@ Socket::Socket(int domain, int service, int protocol, u_short port, u_long inter
     address.sin_addr.s_addr = htonl(interface);
 
     socket_fd = socket(domain, service, protocol);
+    std::cout<<"Socket Connected with ID: "<<socket_fd<<std::endl;
 }
 
 Socket& Socket::operator=(Socket&& other) noexcept

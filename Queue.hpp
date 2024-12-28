@@ -19,7 +19,7 @@ public:
   void push(T&& value) {
     std::lock_guard<std::mutex> lck(mtx);
     queue.push(std::forward<T>(value));
-    cond_var.notify_one();
+    cond_var.notify_all();
   }
 
   T pop() {
