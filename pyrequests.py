@@ -10,7 +10,7 @@ data = {
 #response = requests.post("http://localhost:8089/index.html", data=data)
 response = requests.post("http://localhost:8089/index.html?key4=value4&key5=value5", data=data)
 
-if response.status_code == 201:
+if response.status_code == 200:
     print("POST request successful!")
     print(response.json())  # Print the JSON response if applicable
 else:

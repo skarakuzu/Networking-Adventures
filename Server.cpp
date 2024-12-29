@@ -6,31 +6,72 @@ Server::Server(int domain, int service, int protocol, u_short port, u_long inter
     server_socket->bind_socket();
     server_socket->listen_socket(numconn);
 }
-void Server::accept_connection()
+int Server::accept_connection()
 { 
-    client_socket_fd = server_socket->accept_connection();
+    return server_socket->accept_connection();
 }
 
-void Server::handle_connection()
+void Server::handle_connection(int client_socket_fd)
 {
+    //int client_socket_fd = accept_connection();
     //char buffer[30000] ={0};
     std::string buffer(30000, '\0');
 
     read(client_socket_fd, buffer.data(), buffer.size()-1);
     std::cout<<"The working thread is with ID: "<< std::this_thread::get_id()<<" with socket ID: "<<client_socket_fd<<std::endl;
-
+    
+    HTTPRequest request;
+    
     request.parser(buffer);
+    std::string url = request.get_url();
+    std::string filePath = "." + url;
+    std::cout<<"File path is: "<<filePath<<" "<<filePath.length()<<std::endl;
+    //if(filePath.length() <=2)
+    //{
+    //    filePath = "./index.html"; 
+    //}
 
-    std::cout<< buffer <<std::endl;
+    //std::cout<< buffer <<std::endl;
+    // Completely C now, change to C++ asap
+    struct stat stat_buf;
+    int fdimg = open(filePath.c_str(), 0);
 
-    char * hello = "Hello from server";
-    write(client_socket_fd, hello, strlen(hello));
+    std::string header = request.responses[HTTP_HEADER];
+
+    if(fdimg < 0 || filePath.length() < 2)
+    {
+        header = request.responses[NOT_FOUND];
+        printf("cannot open file path: %s,\n", filePath.c_str());
+    }
+    fstat(fdimg, &stat_buf);
+    int img_total_size = stat_buf.st_size;
+    int block_size = stat_buf.st_blksize;
+
+    char buffer_write[img_total_size];
+    ssize_t bytes_read;
+
+    int sent_bytes = read(fdimg, buffer_write, sizeof(buffer_write));
+    std::cout<<"sent bytes is: "<<sent_bytes<<std::endl;
+
+
+    std::cout<<"header is: "<<header<<std::endl;
+
+    write(client_socket_fd, header.data(), header.size());
+    
+    if (sent_bytes > 0)
+    {
+        write(client_socket_fd, buffer_write, sent_bytes);
+    }
+
+    close(fdimg);
+
+    close(client_socket_fd);
 }
 
 void Server::respond_to_connection()
 {
      char * hello = "Hello from server";
-     write(client_socket_fd, hello, strlen(hello));
+     //write(client_socket_fd, hello, strlen(hello));
 }
 
 void Server::shut_down()
@@ -49,14 +90,18 @@ bool Server::get_interrupt_stat()
 
 void Server::launch_server()
 {
-    Threadpool<std::packaged_task<void()>> tp;
+    //Threadpool<std::packaged_task<void()>> tp;
+    Threadpool<std::function<void()>> tp;
+
 
     while(!get_interrupt_stat())
     {
         std::cout<<"=======waiting======\n";
 
-        accept_connection();
-        tp.submit(std::packaged_task<void()>([this]{return handle_connection();}));
+        int conn = accept_connection();
+        //tp.submit(std::packaged_task<void()>([this, conn](){return handle_connection(conn);}));
+        tp.submit([this, conn]{return handle_connection(conn);});
+
         //handle_connection();
         //respond_to_connection();
         std::cout<<"=======done=========\n";

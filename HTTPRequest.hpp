@@ -21,13 +21,28 @@ Accept-Encoding: gzip, deflate
 Connection: keep-alive
  */
 
+
+enum{
+      HTTP_HEADER,
+      BAD_REQUEST,
+      NOT_FOUND,
+ }messageType;
+
 class HTTPRequest
 {
     void parse_body(std::string& str, std::map<std::string, std::string>& body_map);
 
-public:
+    std::map<std::string, std::string> request_map;
+    std::map<std::string, std::string> header_map;
+    std::map<std::string, std::string> body_map;
 
+public:
+    std::string get_url();
     void parser(std::string& str);
+    
+    static const std::array<std::string, 3> responses;
+
 };
+
 
 #endif

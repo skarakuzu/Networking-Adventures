@@ -6,15 +6,21 @@
 #include "HTTPRequest.hpp"
 #include <functional>
 
+#include <sys/uio.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 class Server{
 
-    int client_socket_fd;
+    //int client_socket_fd;
     std::unique_ptr<Socket> server_socket;
-    HTTPRequest request;
+    //HTTPRequest request;
     volatile sig_atomic_t interrupted = 0;
 
-    void accept_connection();
-    void handle_connection();
+    int accept_connection();
+    void handle_connection(int);
     void respond_to_connection();
 
  public:
