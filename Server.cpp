@@ -36,31 +36,33 @@ void Server::handle_connection(int client_socket_fd)
     struct stat stat_buf;
     int fdimg = open(filePath.c_str(), 0);
 
-    std::string header = request.responses[HTTP_HEADER];
+    std::string header{request.responses[HTTP_HEADER]};
+    //std::cout<<"cheking address of request class: "<<&request<<std::endl;
+    //std::cout<<"cheking address of static vars: "<<&request.responses<<std::endl;
+    std::cout<<"cheking address of mimetype array: "<<&request.mimetype<<std::endl;
 
-    if(fdimg < 0 || filePath.length() < 2)
+    if(fdimg < 0 || filePath.length() <= 2)
     {
-        header = request.responses[NOT_FOUND];
+        header = std::string(request.responses[NOT_FOUND]);
         printf("cannot open file path: %s,\n", filePath.c_str());
     }
     fstat(fdimg, &stat_buf);
     int img_total_size = stat_buf.st_size;
     int block_size = stat_buf.st_blksize;
 
-    char buffer_write[img_total_size];
+    std::string buffer_write(img_total_size, '\0');
     ssize_t bytes_read;
 
-    int sent_bytes = read(fdimg, buffer_write, sizeof(buffer_write));
-    std::cout<<"sent bytes is: "<<sent_bytes<<std::endl;
+    int read_bytes = read(fdimg, buffer_write.data(), buffer_write.size()-1);
+    std::cout<<"sent bytes is: "<<read_bytes<<std::endl;
 
+    //std::cout<<"header is: "<<header<<std::endl;
 
-    std::cout<<"header is: "<<header<<std::endl;
-
-    write(client_socket_fd, header.data(), header.size());
-    
-    if (sent_bytes > 0)
+    if (read_bytes > 0)
     {
-        write(client_socket_fd, buffer_write, sent_bytes);
+        std::string response = header + request.get_content_type() + buffer_write;
+        //std::cout<<"Printing the response: "<<response<<std::endl;
+        write(client_socket_fd, response.c_str(), response.size());
     }
 
     close(fdimg);

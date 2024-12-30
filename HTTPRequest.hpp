@@ -5,22 +5,8 @@
 #include<map>
 #include <sstream>
 #include<string_view>
-
-/*
-GET /index.html HTTP/1.1
-Host: 127.0.0.1:8089
-Sec-Fetch-Dest: document
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Safari/605.1.15
-Upgrade-Insecure-Requests: 1
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*//*;q=0.8
-Sec-Fetch-Site: none
-Sec-Fetch-Mode: navigate
-Accept-Language: en-US,en;q=0.9
-Priority: u=0, i
-Accept-Encoding: gzip, deflate
-Connection: keep-alive
- */
-
+#include<array>
+#include <algorithm>
 
 enum{
       HTTP_HEADER,
@@ -35,12 +21,28 @@ class HTTPRequest
     std::map<std::string, std::string> request_map;
     std::map<std::string, std::string> header_map;
     std::map<std::string, std::string> body_map;
+    std::string fileExtension;
 
 public:
     std::string get_url();
+
+    std::string get_content_type();
+
     void parser(std::string& str);
-    
-    static const std::array<std::string, 3> responses;
+
+    static constexpr std::array<std::pair<std::string_view, std::string_view> , 4> mimetype = 
+    {
+    std::make_pair("json", "application/json\r\n\r\n"),
+    std::make_pair("png", "image/png\r\n\r\n"),
+    std::make_pair("txt", "text/plain\r\n\r\n"),
+    std::make_pair("html", "text/html\r\n\r\n")
+    };
+    static constexpr std::array<std::string_view, 3> responses = 
+    {
+    "HTTP/1.1 200 OK\r\n",
+    "HTTP/1.0 400 Bad request \r\n",
+    "HTTP/1.0 404 File not found \r\n"
+    };
 
 };
 

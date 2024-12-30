@@ -1,9 +1,5 @@
 #include "HTTPRequest.hpp"
 
-const std::array<std::string, 3> HTTPRequest::responses = {"HTTP/1.1 200 OK\r\n",
-    "HTTP/1.0 400 Bad request \r\n Content-Type: text/html\r\n\r\n <!doctype html><html><body>System is busy right now.</body></html>",
-    "HTTP/1.0 404 File not found \r\n Content-Type: text/html\r\n\r\n <!doctype html><html><body>The requested file does not on this server.</body></html>"};
-
 void HTTPRequest::parse_body(std::string& line, std::map<std::string, std::string>& body_map)
 {    
      int pos, ref_pos, end_pos, dummy;
@@ -55,6 +51,14 @@ void HTTPRequest::parser(std::string& request_str)
     {
         request_map.insert({"url", line});
     }
+    
+    url = request_map["url"];
+    pos = url.find_first_of('.');
+    if(pos != std::string::npos)
+    {
+        fileExtension = url.substr(pos+1);
+        std::cout<<"The file extension is: "<<fileExtension<<std::endl;
+    }
 
     //std::cout<<"reading ...: "<<method<<" "<<url<<" "<<version<<std::endl;
     //std::cout<<"********* started printing *******************\n";
@@ -102,3 +106,8 @@ std::string HTTPRequest::get_url()
     return request_map["url"];
 }
 
+std::string HTTPRequest::get_content_type()
+{
+       auto it = std::find_if(mimetype.begin(), mimetype.end(), [this](const auto& p) { return p.first == fileExtension; });
+       return it != mimetype.end() ? std::string(it->second) : nullptr;
+}
