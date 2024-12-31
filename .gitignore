@@ -11,6 +11,7 @@ cmake-build-release/
 *.html
 *.txt
 *.png
+*.jpg
 
 # Build artifacts
 build/

@@ -30,12 +30,13 @@ public:
 
     void parser(std::string& str);
 
-    static constexpr std::array<std::pair<std::string_view, std::string_view> , 4> mimetype = 
+    static constexpr std::array<std::pair<std::string_view, std::string_view> , 5> mimetype = 
     {
     std::make_pair("json", "application/json\r\n\r\n"),
     std::make_pair("png", "image/png\r\n\r\n"),
     std::make_pair("txt", "text/plain\r\n\r\n"),
-    std::make_pair("html", "text/html\r\n\r\n")
+    std::make_pair("html", "text/html\r\n\r\n"),
+    std::make_pair("jpg", "image/jpg\r\n\r\n")
     };
     static constexpr std::array<std::string_view, 3> responses = 
     {

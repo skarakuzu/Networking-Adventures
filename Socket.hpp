@@ -13,7 +13,7 @@ class Socket{
     struct sockaddr_in address;
 
 public:
-    Socket() = default;
+    Socket() = delete;
     
     // Copy Constructor and copy assignemt not allowed
     Socket(Socket& other) = delete;
@@ -33,7 +33,6 @@ public:
     int listen_socket(int backlog);
     int accept_connection();
     int close_socket();
-
 
     ~Socket();
 };

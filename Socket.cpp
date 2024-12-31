@@ -84,7 +84,8 @@ int Socket::listen_socket(int backlog)
 }
 
 int Socket::close_socket()
-{
+{   
+    std::cout<<"------>>>>>> Closing the socket...\n";
     return close(socket_fd);
 }
 

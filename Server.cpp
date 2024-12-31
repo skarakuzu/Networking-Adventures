@@ -46,6 +46,10 @@ void Server::handle_connection(int client_socket_fd)
     {
         header = std::string(request.responses[NOT_FOUND]);
         printf("cannot open file path: %s,\n", filePath.c_str());
+        std::string response = header;
+        //std::cout<<"Printing the response: "<<response<<std::endl;
+        write(client_socket_fd, response.c_str(), response.size());
+
         close(fdimg);
 
         close(client_socket_fd);
@@ -54,12 +58,13 @@ void Server::handle_connection(int client_socket_fd)
     fstat(fdimg, &stat_buf);
     int img_total_size = stat_buf.st_size;
     int block_size = stat_buf.st_blksize;
-    std::cout<<"total byte vs block bytes is: "<<img_total_size<<" "<<block_size<<std::endl;
 
     std::string buffer_write(img_total_size, '\0');
     ssize_t bytes_read;
 
     int read_bytes = read(fdimg, buffer_write.data(), buffer_write.size()-1);
+    std::cout<<"total byte vs block bytes vs read buffer is: "<<img_total_size<<" "<<block_size<<" "<<buffer_write.size()<<std::endl;
+
     //std::cout<<"total byte vs sent bytes is: "<<img_total_size<<" "<<read_bytes<<std::endl;
 
     //std::cout<<"header is: "<<header<<std::endl;
@@ -71,20 +76,16 @@ void Server::handle_connection(int client_socket_fd)
         //std::cout<<"Printing the response: "<<response<<std::endl;
         write(client_socket_fd, response.c_str(), response.size());
 
-        int send_bytes = ((img_total_size < block_size) ? img_total_size : block_size );
-        write(client_socket_fd, buffer_write.c_str(), send_bytes);
-        img_total_size = img_total_size - send_bytes;
-
-        size_t sent_size = send_bytes;
+        size_t sent_size = 0;
         while(img_total_size > 0)
         {
-        std::cout<<"here sending data"<<std::endl;
+        //std::cout<<"here sending data"<<std::endl;
         int send_bytes = ((img_total_size < block_size) ? img_total_size : block_size );
         write(client_socket_fd, buffer_write.c_str()+sent_size, send_bytes);
         img_total_size = img_total_size - send_bytes;
         sent_size += send_bytes;
         }
-        std::cout<<"here finished sending data"<<std::endl;
+        //std::cout<<"here finished sending data"<<std::endl;
 
     }
 
@@ -115,9 +116,10 @@ bool Server::get_interrupt_stat()
 
 void Server::launch_server()
 {
+    std::cout<<"********** SERVER LAUNCH WELCOME MESSAGE : WAITING FOR TASKS ******************\n";
     //Threadpool<std::packaged_task<void()>> tp;
     Threadpool<std::function<void()>> tp;
-
+    
 
     while(!get_interrupt_stat())
     {
