@@ -16,19 +16,21 @@ template <typename T> class Queue {
 public:
   Queue() = default;
 
-  void push(T&& value) {
-    std::lock_guard<std::mutex> lck(mtx);
-    queue.push(std::forward<T>(value));
-    cond_var.notify_all();
+  void push(T&& value) 
+  {
+      std::lock_guard<std::mutex> lck(mtx);
+      queue.push(std::forward<T>(value));
+      cond_var.notify_all();
   }
 
-  T pop() {
-    std::unique_lock<std::mutex> lck(mtx);
-    cond_var.wait(lck, [this] { return !queue.empty(); });
+  T pop() 
+  {
+      std::unique_lock<std::mutex> lck(mtx);
+      cond_var.wait(lck, [this] { return !queue.empty(); });
 
-    T value{std::forward<T>(queue.front())};
-    queue.pop();
-    return value;
+      T value{std::move(queue.front())};
+      queue.pop();
+      return value;
   }
 };
 

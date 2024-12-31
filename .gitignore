@@ -27,3 +27,4 @@ server
 
 # IDE-specific files
 .vscode/
+/public

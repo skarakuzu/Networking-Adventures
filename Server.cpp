@@ -17,19 +17,16 @@ void Server::handle_connection(int client_socket_fd)
     //char buffer[30000] ={0};
     std::string buffer(30000, '\0');
 
-    read(client_socket_fd, buffer.data(), buffer.size()-1);
+    read(client_socket_fd, &buffer[0], buffer.size());
     std::cout<<"The working thread is with ID: "<< std::this_thread::get_id()<<" with socket ID: "<<client_socket_fd<<std::endl;
     
     HTTPRequest request;
     
     request.parser(buffer);
     std::string url = request.get_url();
-    std::string filePath = "." + url;
+    std::string filePath = "./public" + url;
+
     std::cout<<"File path is: "<<filePath<<" "<<filePath.length()<<std::endl;
-    //if(filePath.length() <=2)
-    //{
-    //    filePath = "./index.html"; 
-    //}
 
     //std::cout<< buffer <<std::endl;
     // Completely C now, change to C++ asap
@@ -60,9 +57,11 @@ void Server::handle_connection(int client_socket_fd)
     int block_size = stat_buf.st_blksize;
 
     std::string buffer_write(img_total_size, '\0');
-    ssize_t bytes_read;
 
-    int read_bytes = read(fdimg, buffer_write.data(), buffer_write.size()-1);
+    // string.c_str : Returns a pointer a null-terminated C-style string. seems like returning const char * so it cannot be modified
+    // string.data:  Does not require nut termination and returns char * 
+
+    int read_bytes = read(fdimg, &buffer_write[0], buffer_write.size());
     std::cout<<"total byte vs block bytes vs read buffer is: "<<img_total_size<<" "<<block_size<<" "<<buffer_write.size()<<std::endl;
 
     //std::cout<<"total byte vs sent bytes is: "<<img_total_size<<" "<<read_bytes<<std::endl;
@@ -73,7 +72,7 @@ void Server::handle_connection(int client_socket_fd)
     {
         //std::string response = header + request.get_content_type() + buffer_write;
         std::string response = header + request.get_content_type();
-        //std::cout<<"Printing the response: "<<response<<std::endl;
+        std::cout<<"Printing the response: "<<response<<std::endl;
         write(client_socket_fd, response.c_str(), response.size());
 
         size_t sent_size = 0;
@@ -92,12 +91,6 @@ void Server::handle_connection(int client_socket_fd)
     close(fdimg);
 
     close(client_socket_fd);
-}
-
-void Server::respond_to_connection()
-{
-     char * hello = "Hello from server";
-     //write(client_socket_fd, hello, strlen(hello));
 }
 
 void Server::shut_down()

@@ -32,33 +32,35 @@ void HTTPRequest::parser(std::string& request_str)
 
     std::stringstream ss(request_str);
 
-    int pos, ref_pos, end_pos, dummy;
+    int pos, pos_dot, end_pos, dummy;
     std::string str, line, first, second, version, method, url; 
 
     ss >> method >> line >> version;
     request_map.insert({"method", method});
     request_map.insert({"version", version});
 
+    if (line.length() <= 2) line = "/index.html";
+    
     pos = line.find_first_of('?');
+    pos_dot = line.find_first_of('.');
     if(pos != std::string::npos)
     {
         url = line.substr(0, pos);
         str = line.substr(pos+1);
         parse_body(str, body_map);
-        request_map.insert({"url", url});
+
+        fileExtension = pos_dot != std::string::npos ? url.substr(pos_dot+1) : "html";
+        if (pos_dot != std::string::npos) request_map.insert({"url", url});
+        else request_map.insert({"url", url + '.' + fileExtension});
     }
     else
     {
-        request_map.insert({"url", line});
+        fileExtension = pos_dot != std::string::npos ? line.substr(pos_dot+1) : "html";
+        if (pos_dot != std::string::npos) request_map.insert({"url", line});
+        else request_map.insert({"url", line + '.' + fileExtension});
     }
     
-    url = request_map["url"];
-    pos = url.find_first_of('.');
-    if(pos != std::string::npos)
-    {
-        fileExtension = url.substr(pos+1);
-        std::cout<<"The file extension is: "<<fileExtension<<std::endl;
-    }
+    //std::cout<<"The file extension is: "<<fileExtension<<std::endl;
 
     //std::cout<<"reading ...: "<<method<<" "<<url<<" "<<version<<std::endl;
     //std::cout<<"********* started printing *******************\n";
@@ -105,6 +107,12 @@ std::string HTTPRequest::get_url()
 {
     return request_map["url"];
 }
+
+std::string HTTPRequest::get_fileExtension()
+{
+    return fileExtension;
+}
+
 
 std::string HTTPRequest::get_content_type()
 {

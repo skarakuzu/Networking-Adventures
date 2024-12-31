@@ -27,16 +27,22 @@ public:
     std::string get_url();
 
     std::string get_content_type();
+    std::string get_fileExtension();
 
     void parser(std::string& str);
 
-    static constexpr std::array<std::pair<std::string_view, std::string_view> , 5> mimetype = 
+    static constexpr std::array<std::pair<std::string_view, std::string_view> , 10> mimetype = 
     {
-    std::make_pair("json", "application/json\r\n\r\n"),
-    std::make_pair("png", "image/png\r\n\r\n"),
-    std::make_pair("txt", "text/plain\r\n\r\n"),
-    std::make_pair("html", "text/html\r\n\r\n"),
-    std::make_pair("jpg", "image/jpg\r\n\r\n")
+    std::make_pair("json", "Content-Type: application/json\r\n\r\n"),
+    std::make_pair("png",  "Content-Type: image/png\r\n\r\n"),
+    std::make_pair("txt",  "Content-Type: text/plain\r\n\r\n"),
+    std::make_pair("html", "Content-Type: text/html\r\n\r\n"),
+    std::make_pair("jpg",  "Content-Type: image/jpg\r\n\r\n"),
+    std::make_pair("php",  "Content-Type: application/x-httpd-php\r\n\r\n"),
+    std::make_pair("js",   "Content-Type: text/javascript\r\n\r\n"),
+    std::make_pair("css",  "Content-Type: text/css\r\n\r\n"),
+    std::make_pair("svg",  "Content-Type: image/svg+xml\r\n\r\n"),
+    std::make_pair("ico",  "Content-Type: image/vnd.microsoft.icon\r\n\r\n"),
     };
     static constexpr std::array<std::string_view, 3> responses = 
     {
