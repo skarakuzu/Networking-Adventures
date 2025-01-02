@@ -5,6 +5,7 @@ CMakeFiles/
 cmake-build-debug/
 cmake-build-release/
 *.cmake
+*.py
 
 # file types
 *.json
@@ -28,3 +29,4 @@ server
 # IDE-specific files
 .vscode/
 /public
+/thread_tests/

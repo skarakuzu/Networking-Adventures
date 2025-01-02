@@ -62,7 +62,7 @@ int Socket::accept_connection()
 {
     socklen_t addrlen = sizeof(address);
     int new_sock = accept(socket_fd, (struct sockaddr *)&address, &addrlen);
-    if (new_sock <= 0)
+    if (new_sock < 0)
         throw std::runtime_error("Cannot accept connections to the socket");
     return new_sock;
 }

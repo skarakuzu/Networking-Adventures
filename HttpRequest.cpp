@@ -39,8 +39,8 @@ void HTTPRequest::parser(std::string& request_str)
     request_map.insert({"method", method});
     request_map.insert({"version", version});
 
-    if (line.length() <= 2) line = "/index.html";
-    
+    if (line.length() <= 2 && method != "POST") line = "/index.html";
+
     pos = line.find_first_of('?');
     pos_dot = line.find_first_of('.');
     if(pos != std::string::npos)
@@ -49,13 +49,13 @@ void HTTPRequest::parser(std::string& request_str)
         str = line.substr(pos+1);
         parse_body(str, body_map);
 
-        fileExtension = pos_dot != std::string::npos ? url.substr(pos_dot+1) : "html";
+        if (method != "POST") fileExtension = pos_dot != std::string::npos ? url.substr(pos_dot+1) : "html";
         if (pos_dot != std::string::npos) request_map.insert({"url", url});
         else request_map.insert({"url", url + '.' + fileExtension});
     }
     else
     {
-        fileExtension = pos_dot != std::string::npos ? line.substr(pos_dot+1) : "html";
+        if (method != "POST") fileExtension = pos_dot != std::string::npos ? line.substr(pos_dot+1) : "html";
         if (pos_dot != std::string::npos) request_map.insert({"url", line});
         else request_map.insert({"url", line + '.' + fileExtension});
     }
@@ -81,21 +81,30 @@ void HTTPRequest::parser(std::string& request_str)
 
     }
 
+    if (header_map["Content-Type"].find("multipart/form-data") == std::string::npos)
+    {
     while (std::getline(ss, line)) 
     {
         //std::cout<<"Here with the line: "<<line<<std::endl;
         parse_body(line, body_map);
+    }
+    }
+    else
+    {
+        //std::cout<<"Here I am ~!!!!\n";
     }
 
     /*
     std::cout<<"printing request map..\n";
     for (const auto& pair : request_map)
         std::cout << pair.first << " " << pair.second << std::endl;
-    
+    */
+    /*
     std::cout<<"printing header map..\n";
     for (const auto& pair : header_map)
         std::cout << pair.first << " " << pair.second << std::endl;
-
+    */
+    /*
     std::cout<<"printing body map..\n";
     for (const auto& pair : body_map)
         std::cout << pair.first << " " << pair.second << std::endl;

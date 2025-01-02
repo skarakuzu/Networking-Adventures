@@ -18,7 +18,7 @@ class Server{
     std::unique_ptr<Socket> server_socket;
     //HTTPRequest request;
     volatile sig_atomic_t interrupted = 0;
-
+    int num_workers;
     int accept_connection();
     void handle_connection(int);
     void respond_to_connection();
