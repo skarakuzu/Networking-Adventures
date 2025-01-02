@@ -23,7 +23,9 @@ void Server::handle_connection(int client_socket_fd)
     
     // string.c_str : Returns a pointer a null-terminated C-style string. seems like returning const char * so it cannot be modified
     // string.data:  Does not require nut termination and returns char * 
-    read(client_socket_fd, &buffer[0], buffer.size());
+    int readed = read(client_socket_fd, &buffer[0], buffer.size());
+    if (readed < 0) { std::cout<<"Cannot read from the socket....\n"; return; }
+    //std::cout<< buffer <<std::endl;
     std::cout<<"The working thread is with ID: "<< std::this_thread::get_id()<<" with socket ID: "<<client_socket_fd<<std::endl;
     
     HTTPRequest request;
@@ -42,8 +44,6 @@ void Server::handle_connection(int client_socket_fd)
 
     std::cout<<"File path is: "<<filePath<<" "<<filePath.length()<<std::endl;
 
-    //std::cout<< buffer <<std::endl;
-    // Completely C now, change to C++ asap
 
     struct stat stat_buf;
     int fdimg = open(filePath.c_str(), 0);
@@ -81,15 +81,16 @@ void Server::handle_connection(int client_socket_fd)
     //std::cout<<"Printing the response: "<<response<<std::endl;
     write(client_socket_fd, response.c_str(), response.size());
 
-    int sent_size = 0;
+    int sent_size = 0, done_bytes, send_bytes;
     //std::cout<<"here started sending data with sent_size vs total size: "<<sent_size<<" "<<img_total_size<<std::endl;
     while(img_total_size > 0)
     {
-        int send_bytes = ((img_total_size < block_size) ? img_total_size : block_size );
+        send_bytes = ((img_total_size < block_size) ? img_total_size : block_size );
         len = send_bytes;
 
         // Definition of sendfile on macos is "int sent = sendfile(fd, sockfd, offset, &len, nullptr, flags);". It does file writing with zero copy 
-        int done_bytes = sendfile(fdimg, client_socket_fd, offset, &len, NULL, flags); // for MACOS
+        done_bytes = sendfile(fdimg, client_socket_fd, offset, &len, NULL, flags); // for MACOS
+        if (done_bytes < 0) { std::cout<<"Cannot read from the socket....\n"; return; }
         //int done_bytes = sendfile(client_socket_fd, fdimg, NULL, send_bytes); / For LINUX
 
         //std::cout<<"total byte vs block bytes vs read buffer vs len is: "<<img_total_size<<" "<<block_size<<" "<<len<<std::endl;
@@ -122,7 +123,7 @@ bool Server::get_interrupt_stat()
 void Server::launch_server()
 {
     std::cout<<"********** SERVER LAUNCH WELCOME MESSAGE : WAITING FOR TASKS ******************\n";
-    //Threadpool<std::packaged_task<void()>> tp;
+    //Threadpool<std::packaged_task<void()>> tp(num_workers);
     //Threadpool<std::function<void()>> tp(1);
     Threadpool<std::function<void()>> tp(num_workers);
 

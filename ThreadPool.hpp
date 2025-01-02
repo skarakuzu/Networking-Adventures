@@ -20,7 +20,8 @@ class Threadpool {
   {
       while (true) 
       {
-          TaskType task = task_queue.pop();
+          TaskType task;
+          task_queue.pop(task);
           task();
       }
   }

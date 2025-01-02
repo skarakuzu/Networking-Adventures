@@ -23,14 +23,13 @@ public:
       cond_var.notify_all();
   }
 
-  T pop() 
+  void pop(T& value) 
   {
       std::unique_lock<std::mutex> lck(mtx);
       cond_var.wait(lck, [this] { return !queue.empty(); });
 
-      T value{std::move(queue.front())};
+      value = std::move(queue.front());
       queue.pop();
-      return value;
   }
 };
 
