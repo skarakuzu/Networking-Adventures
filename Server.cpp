@@ -25,20 +25,16 @@ void Server::handle_connection(int client_socket_fd)
     // string.data:  Does not require nut termination and returns char * 
     int readed = read(client_socket_fd, &buffer[0], buffer.size());
     if (readed < 0) { std::cout<<"Cannot read from the socket....\n"; return; }
-    //std::cout<< buffer <<std::endl;
+    std::cout<< buffer <<std::endl;
     std::cout<<"The working thread is with ID: "<< std::this_thread::get_id()<<" with socket ID: "<<client_socket_fd<<std::endl;
     
     HTTPRequest request;
     
     request.parser(buffer);
 
-    //For chunk testing purposes only , delete later
-    /*std::cout<< buffer <<std::endl;
-    std::string response_temp = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-    write(client_socket_fd, response_temp.c_str(), response_temp.size());
-    close(client_socket_fd);
-    return ;*/
-
+    request.respond(client_socket_fd);
+    
+    /*
     std::string url = request.get_url();
     std::string filePath = "./public" + url;
 
@@ -90,8 +86,8 @@ void Server::handle_connection(int client_socket_fd)
 
         // Definition of sendfile on macos is "int sent = sendfile(fd, sockfd, offset, &len, nullptr, flags);". It does file writing with zero copy 
         done_bytes = sendfile(fdimg, client_socket_fd, offset, &len, NULL, flags); // for MACOS
+        //done_bytes = sendfile(client_socket_fd, fdimg, NULL, send_bytes); / For LINUX
         if (done_bytes < 0) { std::cout<<"Cannot read from the socket....\n"; return; }
-        //int done_bytes = sendfile(client_socket_fd, fdimg, NULL, send_bytes); / For LINUX
 
         //std::cout<<"total byte vs block bytes vs read buffer vs len is: "<<img_total_size<<" "<<block_size<<" "<<len<<std::endl;
         offset += len;
@@ -102,7 +98,7 @@ void Server::handle_connection(int client_socket_fd)
 
 
     close(fdimg);
-
+    */
     close(client_socket_fd);
 }
 

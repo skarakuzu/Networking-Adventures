@@ -8,6 +8,13 @@
 #include<array>
 #include <algorithm>
 
+//#include <sys/uio.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include<sys/socket.h>
+
 enum{
       HTTP_HEADER,
       BAD_REQUEST,
@@ -22,14 +29,21 @@ class HTTPRequest
     std::map<std::string, std::string> header_map;
     std::map<std::string, std::string> body_map;
     std::string fileExtension;
+    std::string filename_to_write;
+    std::string file_boundry;
+    std::stringstream ss;
 
 public:
     std::string get_url();
 
     std::string get_content_type();
     std::string get_fileExtension();
+    std::streampos get_buffer_postion();
 
     void parser(std::string& str);
+
+    void respond(int socket_id);
+    void respond_type_get(int socket_id);
 
     static constexpr std::array<std::pair<std::string_view, std::string_view> , 10> mimetype = 
     {
