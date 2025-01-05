@@ -12,6 +12,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include "ResponseHandler.hpp"
+
 class Server{
 
     //int client_socket_fd;

@@ -127,7 +127,7 @@ void HTTPRequest::parser(std::string& request_str)
     */
 }
 
-
+/*
 void HTTPRequest::respond_type_get(int client_socket_fd)
 {
     std::string filePath = "./public" + get_url();
@@ -194,12 +194,52 @@ void HTTPRequest::respond_type_get(int client_socket_fd)
     close(fdimg);
 
 }
-
-void HTTPRequest::respond(int socket_id)
+*/
+void HTTPRequest::respond_type_post(int client_socket_fd)
 {
+
+}
+void HTTPRequest::respond_type_put(int client_socket_fd)
+{
+    std::ofstream theFile(filename_to_write);
+    if (theFile.is_open()) {
+        theFile << "Hello, World!\n"; // Write to the file
+        theFile.close(); // Close the file
+
+        std::cout << "File written successfully." << std::endl;
+    } else {
+        std::cerr << "Error opening file." << std::endl;
+    }
+
+    std::string header{responses[HTTP_HEADER]};
+    std::string response = header + get_content_type();
+    //std::cout<<"Printing the response: "<<response<<std::endl;
+    write(client_socket_fd, response.c_str(), response.size());
+    std::ofstream myFile(filename_to_write);
+}
+
+void HTTPRequest::respond(int socket_id, std::string&& buffer, std::shared_ptr<BaseTask>& basePtr )
+{        
+    //std::cout<<"In respond function: "<<request_map["method"]<<std::endl;
+    std::string content_type = get_content_type();
     if(request_map["method"] == "GET")
     {
-        respond_type_get(socket_id);
+        //respond_type_get(socket_id);
+        //std::cout<<"In GET method \n";
+        basePtr = std::make_shared<ReaderTask>(ReaderTask(socket_id, 0, 0, std::forward<std::string>(buffer), get_url(), content_type));
+        
+    }
+    else if(request_map["method"] == "POST")
+    {
+        //respond_type_post(socket_id);
+        std::string content_type = get_content_type();
+        //basePtr = std::make_shared<WriterTask>(WriterTask(socket_id, 0, 0, std::forward<std::string>(buffer), get_url(), content_type));
+    }
+    else if(request_map["method"] == "PUT")
+    {
+        //respond_type_put(socket_id);
+        std::string content_type = get_content_type();
+        basePtr = std::make_shared<WriterTask>(WriterTask(socket_id, 0, 0, std::forward<std::string>(buffer), get_url(), content_type));
     }
 }
 
@@ -211,6 +251,10 @@ std::streampos HTTPRequest::get_buffer_postion()
 std::string HTTPRequest::get_url()
 {
     return request_map["url"];
+}
+std::string HTTPRequest::get_method()
+{
+    return request_map["method"];
 }
 
 std::string HTTPRequest::get_fileExtension()
