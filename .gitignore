@@ -30,3 +30,5 @@ server
 .vscode/
 /public
 /thread_tests/
+/downloads/
+.DS_Store

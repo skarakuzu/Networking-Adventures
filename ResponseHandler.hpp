@@ -10,51 +10,62 @@ struct BaseTask {
     int client_socket_fd;
     int priority;
     int offset;
+    int content_length;
     std::string buffer;
-    std::string filename;
+    std::string filePath;
     std::string content_type;
 
     virtual ~BaseTask() {} // Virtual destructor for proper cleanup
     virtual int perform() = 0; 
 
-    BaseTask(int socket_id, int priority, int offset, std::string buffer, std::string filename, std::string content_type) : client_socket_fd(socket_id), priority(priority), offset(offset), buffer(std::forward<std::string>(buffer)), filename(filename), content_type(content_type)
-    {
-    }
+    BaseTask(int socket_id, int priority, int offset, int content_length, std::string&& buffer, std::string fname, std::string content_type) : client_socket_fd(socket_id), priority(priority), offset(offset), content_length(content_length), buffer(std::forward<std::string>(buffer)), filePath(fname), content_type(content_type){}
 };
 
-struct WriterTask : BaseTask{
+struct WriterTask : public BaseTask{
 
-    WriterTask(int socket_id, int priority, int offset, std::string buffer, std::string filename, std::string content_type) : BaseTask(socket_id, priority, offset, std::forward<std::string>(buffer), filename, content_type)
+    WriterTask(int socket_id, int priority, int offset, int content_length, std::string&& buffer, std::string fname, std::string content_type) : BaseTask(socket_id, priority, offset, content_length, std::forward<std::string>(buffer), fname, content_type)
     {
+                filePath = "./downloads/" + filePath;
                 std::cout<<"*********************** IN WRITER ********: "<<&buffer<<std::endl;
     }
 
     int perform() override
     {
-        std::cout << "Thread ID: " << std::this_thread::get_id() << std::endl;
-        std::ofstream myFile(filename,  std::ios::app); // Create and open a file for writing
-        if (myFile.is_open()) {
-            myFile << buffer << std::endl; // Write to the file
-            myFile.close(); // Close the file
+
+        std::cout << "Thread ID: " << std::this_thread::get_id() << " writing to the file: "<<filePath<<std::endl;
+        std::ofstream outFile(filePath,  std::ios::app); // Create and open a file for writing
+        if (outFile.is_open()) 
+        {
+            outFile.write(buffer.c_str() + offset, content_length); // Write to the file
+            outFile.close(); // Close the file
+
+            std::string header{responses[FILE_CREATED]};
+            std::string response = header + content_type;
+            //std::cout<<"Printing the response: "<<response<<std::endl;
+            write(client_socket_fd, response.c_str(), response.size());
             //std::cout << "File written successfully!" << std::endl;
-        } else {
+        } else 
+        {
+            std::string header = std::string(responses[NOT_FOUND]);
+            write(client_socket_fd, header.c_str(), header.size());
             //std::cout << "Error opening the file." << std::endl;
         }
         return 1;
     }
 };
 
-struct ReaderTask : BaseTask{
+struct ReaderTask : public BaseTask{
 
-    ReaderTask(int socket_id, int priority, int offset, std::string buffer, std::string filename, std::string content_type) : BaseTask(socket_id, priority, offset, std::forward<std::string>(buffer), filename, content_type)
+    ReaderTask(int socket_id, int priority, int offset, int content_length, std::string&& buffer, std::string fname, std::string content_type) : BaseTask(socket_id, priority, offset, content_length, std::forward<std::string>(buffer), fname, content_type)
     {
+        filePath = "./public" + filePath;
         std::cout<<"*********************** IN READER ********: "<<&buffer<<std::endl;;
     }
     
     int perform() override
     {
         std::cout << "Thread ID: " << std::this_thread::get_id() << std::endl;
-        std::string filePath = "./public" + filename;
+        //std::string filePath = "./public" + filename;
 
         std::cout<<"File path is: "<<filePath<<" "<<filePath.length()<<std::endl;
 

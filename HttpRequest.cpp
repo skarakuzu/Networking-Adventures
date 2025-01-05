@@ -100,9 +100,10 @@ void HTTPRequest::parser(std::string& request_str)
 
         std::getline(ss, line);
         std::cout<<"the line "<<line<<std::endl;
-        size_t pos = line.find("filename=");
-        filename_to_write = line.substr(pos, line.length());
-        std::cout<<"the filename "<<filename_to_write<<std::endl;
+        size_t pos = line.find("filename="); // "filename=" has 10 characters and start reading from there
+        filename_to_write = line.substr(pos+10, line.size()-2-pos-10); // get rid of " beginning and end of the filename
+
+        std::cout<<"the filename : "<<filename_to_write<<std::endl;
 
         std::getline(ss, line); //get rid of the empty line
         std::streampos index = ss.tellg();
@@ -201,46 +202,35 @@ void HTTPRequest::respond_type_post(int client_socket_fd)
 }
 void HTTPRequest::respond_type_put(int client_socket_fd)
 {
-    std::ofstream theFile(filename_to_write);
-    if (theFile.is_open()) {
-        theFile << "Hello, World!\n"; // Write to the file
-        theFile.close(); // Close the file
-
-        std::cout << "File written successfully." << std::endl;
-    } else {
-        std::cerr << "Error opening file." << std::endl;
-    }
-
-    std::string header{responses[HTTP_HEADER]};
-    std::string response = header + get_content_type();
-    //std::cout<<"Printing the response: "<<response<<std::endl;
-    write(client_socket_fd, response.c_str(), response.size());
-    std::ofstream myFile(filename_to_write);
 }
 
-void HTTPRequest::respond(int socket_id, std::string&& buffer, std::shared_ptr<BaseTask>& basePtr )
+void HTTPRequest::respond(int socket_id, std::string&& buffer, std::unique_ptr<BaseTask>& basePtr )
 {        
-    //std::cout<<"In respond function: "<<request_map["method"]<<std::endl;
-    std::string content_type = get_content_type();
+    std::cout<<"In respond function: "<<request_map["method"]<<std::endl;
     if(request_map["method"] == "GET")
-    {
+    {    
+        std::string content_type = get_content_type();
         //respond_type_get(socket_id);
         //std::cout<<"In GET method \n";
-        basePtr = std::make_shared<ReaderTask>(ReaderTask(socket_id, 0, 0, std::forward<std::string>(buffer), get_url(), content_type));
+        basePtr = std::make_unique<ReaderTask>(ReaderTask(socket_id, 0, 0, 0, std::forward<std::string>(buffer), get_url(), content_type));
         
     }
     else if(request_map["method"] == "POST")
     {
+        std::cout<<"In POST method \n";
         //respond_type_post(socket_id);
         std::string content_type = get_content_type();
-        //basePtr = std::make_shared<WriterTask>(WriterTask(socket_id, 0, 0, std::forward<std::string>(buffer), get_url(), content_type));
+        //basePtr = std::make_unique<WriterTask>(WriterTask(socket_id, 0, 0, std::forward<std::string>(buffer), get_url(), content_type));
     }
     else if(request_map["method"] == "PUT")
-    {
+    {        
+        std::cout<<"In PUT method \n";
         //respond_type_put(socket_id);
-        std::string content_type = get_content_type();
-        basePtr = std::make_shared<WriterTask>(WriterTask(socket_id, 0, 0, std::forward<std::string>(buffer), get_url(), content_type));
+        basePtr = std::make_unique<WriterTask>(WriterTask(socket_id, 0, get_buffer_postion(), std::stoi(header_map["Content-Length"]), std::forward<std::string>(buffer), filename_to_write, " "));
     }
+        std::cout<<"Ended respond function: "<<request_map["method"]<<std::endl;
+
+
 }
 
 std::streampos HTTPRequest::get_buffer_postion()

@@ -9,9 +9,6 @@
 #include <algorithm>
 #include <fstream>
 
-//#include <sys/uio.h>
-
-
 #include "RequestConsts.h"
 #include "ResponseHandler.hpp"
 
@@ -37,7 +34,7 @@ public:
 
     void parser(std::string& str);
 
-    void  respond(int socket_id, std::string&& buffer,std::shared_ptr<BaseTask>&);
+    void  respond(int socket_id, std::string&& buffer,std::unique_ptr<BaseTask>&);
     void respond_type_get(int socket_id);
     void respond_type_post(int socket_id);
     void respond_type_put(int socket_id);

@@ -18,23 +18,23 @@ void Server::handle_connection(int client_socket_fd)
 {
     std::string buffer(30000, '\0');
 
-    std::cout<< "AAADDRess of static string buffer: "<<&buffer <<" and size: "<<buffer.size()<<std::endl;
+    std::cout<< "AAADDRess of string buffer: "<<&buffer <<" and size: "<<buffer.size()<<std::endl;
 
     
     // string.c_str : Returns a pointer a null-terminated C-style string. seems like returning const char * so it cannot be modified
     // string.data:  Does not require nut termination and returns char * 
     int readed = read(client_socket_fd, &buffer[0], buffer.size());
     if (readed < 0) { std::cout<<"Cannot read from the socket....\n"; return; }
-    //std::cout<< buffer <<std::endl;
+    std::cout<< buffer <<std::endl;
     std::cout<<"The working thread is with ID: "<< std::this_thread::get_id()<<" with socket ID: "<<client_socket_fd<<std::endl;
     
     HTTPRequest request;
     
     request.parser(buffer);
-    //std::cout<< "Parsed the request: "<<request.get_method()<<std::endl;
+    std::cout<< "Parsed the request: "<<request.get_method()<<std::endl;
 
-    std::shared_ptr<BaseTask> basePtr;
-    //std::cout<< "Created the shared pointer: "<<std::endl;
+    std::unique_ptr<BaseTask> basePtr;
+    std::cout<< "Created the unique pointer: "<<std::endl;
 
     request.respond(client_socket_fd, std::move(buffer), basePtr);
     
