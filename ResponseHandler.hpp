@@ -14,18 +14,19 @@ struct BaseTask {
     std::string buffer;
     std::string filePath;
     std::string content_type;
+    std::string boundry;
 
     virtual ~BaseTask() {} // Virtual destructor for proper cleanup
     virtual int perform() = 0; 
 
-    BaseTask(int socket_id, int priority, int offset, int content_length, std::string&& buffer, std::string fname, std::string content_type) : client_socket_fd(socket_id), priority(priority), offset(offset), content_length(content_length), buffer(std::forward<std::string>(buffer)), filePath(fname), content_type(content_type){}
+    BaseTask(int socket_id, int priority, int offset, int content_length, std::string&& buffer, std::string fname, std::string content_type, std::string boundry) : client_socket_fd(socket_id), priority(priority), offset(offset), content_length(content_length), buffer(std::forward<std::string>(buffer)), filePath(fname), content_type(content_type), boundry(boundry){}
 };
 
 struct WriterTask : public BaseTask{
 
-    WriterTask(int socket_id, int priority, int offset, int content_length, std::string&& buffer, std::string fname, std::string content_type) : BaseTask(socket_id, priority, offset, content_length, std::forward<std::string>(buffer), fname, content_type)
+    WriterTask(int socket_id, int priority, int offset, int content_length, std::string&& buffer, std::string fname, std::string content_type, std::string boundry) : BaseTask(socket_id, priority, offset, content_length, std::forward<std::string>(buffer), fname, content_type, boundry)
     {
-                filePath = "./downloads/" + filePath;
+                filePath = "./downloads" + filePath;
                 std::cout<<"*********************** IN WRITER ********: "<<&buffer<<std::endl;
     }
 
@@ -33,20 +34,24 @@ struct WriterTask : public BaseTask{
     {
 
         std::cout << "Thread ID: " << std::this_thread::get_id() << " writing to the file: "<<filePath<<std::endl;
-        std::ofstream outFile(filePath,  std::ios::app); // Create and open a file for writing
+        std::ofstream outFile(filePath,  std::ios::out); // Create and open a file for writing, std::ios::app is for appending
         if (outFile.is_open()) 
         {
+            int pos = buffer.find_last_of(boundry);
+            std::cout<<"Testing pos in response handler: "<<buffer[offset]<<" "<<pos<<" "<<offset<<" "<<content_length<<std::endl;
+            if(pos != std::string::npos) content_length = pos-offset- boundry.size()-6;  // 6 is for : 4 '-' and 2 '\n' characters ?
+
             outFile.write(buffer.c_str() + offset, content_length); // Write to the file
             outFile.close(); // Close the file
 
             std::string header{responses[FILE_CREATED]};
             std::string response = header + content_type;
-            //std::cout<<"Printing the response: "<<response<<std::endl;
+            std::cout<<"Printing the response: "<<response<<std::endl;
             write(client_socket_fd, response.c_str(), response.size());
             //std::cout << "File written successfully!" << std::endl;
         } else 
         {
-            std::string header = std::string(responses[NOT_FOUND]);
+            std::string header = std::string(responses[SERVER_ERROR]);
             write(client_socket_fd, header.c_str(), header.size());
             //std::cout << "Error opening the file." << std::endl;
         }
@@ -56,7 +61,7 @@ struct WriterTask : public BaseTask{
 
 struct ReaderTask : public BaseTask{
 
-    ReaderTask(int socket_id, int priority, int offset, int content_length, std::string&& buffer, std::string fname, std::string content_type) : BaseTask(socket_id, priority, offset, content_length, std::forward<std::string>(buffer), fname, content_type)
+    ReaderTask(int socket_id, int priority, int offset, int content_length, std::string&& buffer, std::string fname, std::string content_type, std::string boundry) : BaseTask(socket_id, priority, offset, content_length, std::forward<std::string>(buffer), fname, content_type, boundry)
     {
         filePath = "./public" + filePath;
         std::cout<<"*********************** IN READER ********: "<<&buffer<<std::endl;;

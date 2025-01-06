@@ -30,7 +30,7 @@ public:
 
     std::string get_content_type();
     std::string get_fileExtension();
-    std::streampos get_buffer_postion();
+    int get_buffer_postion();
 
     void parser(std::string& str);
 

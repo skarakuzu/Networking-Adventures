@@ -16,6 +16,7 @@ enum{
       FILE_CREATED,
       BAD_REQUEST,
       NOT_FOUND,
+      SERVER_ERROR
  }messageType;
 
 static constexpr std::array<std::pair<std::string_view, std::string_view> , 11> mimetype = 
@@ -32,12 +33,13 @@ std::make_pair("svg",  "Content-Type: image/svg+xml\r\n\r\n"),
 std::make_pair("ico",  "Content-Type: image/vnd.microsoft.icon\r\n\r\n"),
 std::make_pair("tiff", "Content-Type: image/tiff\r\n\r\n"),
 };
-static constexpr std::array<std::string_view, 4> responses = 
+static constexpr std::array<std::string_view, 5> responses = 
 {
 "HTTP/1.1 200 OK\r\n",
 "HTTP/1.1 201 OK\r\n",
 "HTTP/1.1 400 Bad request \r\n",
-"HTTP/1.1 404 File not found \r\n"
+"HTTP/1.1 404 File not found \r\n",
+"HTTP/1.1 500 Internal Server error \r\n"
 };
 
 #endif

@@ -94,20 +94,31 @@ void HTTPRequest::parser(std::string& request_str)
     }
     else if(header_map["Content-Type"].find("multipart/form-data") != std::string::npos)
     {
-        std::getline(ss, line); 
+        //std::streampos index_begin = ss.tellg();
+        //std::cout<<"the request string start 0 : "<<request_str[index_begin]<<std::endl;
+
+        std::getline(ss, line); //the line that includes boundry
         file_boundry = line.substr(2);
-        std::cout<<"boundry "<<file_boundry<<std::endl;
+        //std::cout<<"boundry "<<file_boundry<<std::endl;
 
         std::getline(ss, line);
-        std::cout<<"the line "<<line<<std::endl;
+        //std::cout<<"the line "<<line<<std::endl;
         size_t pos = line.find("filename="); // "filename=" has 10 characters and start reading from there
         filename_to_write = line.substr(pos+10, line.size()-2-pos-10); // get rid of " beginning and end of the filename
-
-        std::cout<<"the filename : "<<filename_to_write<<std::endl;
+        filename_to_write = '/' + filename_to_write;
+        //std::cout<<"the filename : "<<filename_to_write<<std::endl;
 
         std::getline(ss, line); //get rid of the empty line
-        std::streampos index = ss.tellg();
-        std::cout<<"the request string start: "<<request_str[index]<<std::endl;
+    
+        //std::streampos index = ss.tellg();
+        //std::cout<<"the request string start 1 : "<<request_str[index]<<std::endl;
+    }
+    else if(header_map["Content-Type"].find("application/octet-stream") != std::string::npos)
+    {
+        std::getline(ss, line); //get rid of the empty line
+        filename_to_write = get_url();
+        //std::cout<<"the filename : "<<filename_to_write<<std::endl;
+        file_boundry = "";
     }
 
     /*
@@ -128,74 +139,6 @@ void HTTPRequest::parser(std::string& request_str)
     */
 }
 
-/*
-void HTTPRequest::respond_type_get(int client_socket_fd)
-{
-    std::string filePath = "./public" + get_url();
-
-    std::cout<<"File path is: "<<filePath<<" "<<filePath.length()<<std::endl;
-
-
-    struct stat stat_buf;
-    int fdimg = open(filePath.c_str(), 0);
-
-    std::string header{responses[HTTP_HEADER]};
-    //std::cout<<"cheking address of request class: "<<&request<<std::endl;
-    //std::cout<<"cheking address of static vars: "<<&request.responses<<std::endl;
-    //std::cout<<"cheking address of mimetype array: "<<&request.mimetype<<std::endl;
-    //std::cout<<"cheking address of messageType enum: "<<&messageType<<std::endl;
-
-    if(fdimg < 0 || filePath.length() <= 2)
-    {
-        header = std::string(responses[NOT_FOUND]);
-        printf("cannot open file path: %s,\n", filePath.c_str());
-        std::string response = header;
-        //std::cout<<"Printing the response: "<<response<<std::endl;
-        write(client_socket_fd, response.c_str(), response.size());
-
-        close(fdimg);
-
-        close(client_socket_fd);
-        return;
-    }
-    fstat(fdimg, &stat_buf);
-    int img_total_size = stat_buf.st_size;
-    int block_size = stat_buf.st_blksize;
-    //std::cout<<"total byte vs block bytes vs read buffer is: "<<img_total_size<<" "<<block_size<<std::endl;
-
-    off_t offset = 0;
-    off_t len = 0; // Send the entire file
-    int flags = 0;
-
-
-    std::string response = header + get_content_type();
-    //std::cout<<"Printing the response: "<<response<<std::endl;
-    write(client_socket_fd, response.c_str(), response.size());
-
-    int sent_size = 0, done_bytes, send_bytes;
-    //std::cout<<"here started sending data with sent_size vs total size: "<<sent_size<<" "<<img_total_size<<std::endl;
-    while(img_total_size > 0)
-    {
-        send_bytes = ((img_total_size < block_size) ? img_total_size : block_size );
-        len = send_bytes;
-
-        // Definition of sendfile on macos is "int sent = sendfile(fd, sockfd, offset, &len, nullptr, flags);". It does file writing with zero copy 
-        done_bytes = sendfile(fdimg, client_socket_fd, offset, &len, NULL, flags); // for MACOS
-        //done_bytes = sendfile(client_socket_fd, fdimg, NULL, send_bytes); / For LINUX
-        if (done_bytes < 0) { std::cout<<"Cannot read from the socket....\n"; return; }
-
-        //std::cout<<"total byte vs block bytes vs read buffer vs len is: "<<img_total_size<<" "<<block_size<<" "<<len<<std::endl;
-        offset += len;
-        img_total_size = img_total_size - send_bytes;
-        sent_size += send_bytes;
-    }
-    //std::cout<<"here finished sending data with sent_size vs total size: "<<sent_size<<" "<<img_total_size<<std::endl;
-
-
-    close(fdimg);
-
-}
-*/
 void HTTPRequest::respond_type_post(int client_socket_fd)
 {
 
@@ -206,36 +149,26 @@ void HTTPRequest::respond_type_put(int client_socket_fd)
 
 void HTTPRequest::respond(int socket_id, std::string&& buffer, std::unique_ptr<BaseTask>& basePtr )
 {        
-    std::cout<<"In respond function: "<<request_map["method"]<<std::endl;
     if(request_map["method"] == "GET")
     {    
         std::string content_type = get_content_type();
-        //respond_type_get(socket_id);
-        //std::cout<<"In GET method \n";
-        basePtr = std::make_unique<ReaderTask>(ReaderTask(socket_id, 0, 0, 0, std::forward<std::string>(buffer), get_url(), content_type));
+        basePtr = std::make_unique<ReaderTask>(ReaderTask(socket_id, 0, 0, 0, std::forward<std::string>(buffer), get_url(), content_type, " "));
         
     }
     else if(request_map["method"] == "POST")
     {
-        std::cout<<"In POST method \n";
-        //respond_type_post(socket_id);
-        std::string content_type = get_content_type();
-        //basePtr = std::make_unique<WriterTask>(WriterTask(socket_id, 0, 0, std::forward<std::string>(buffer), get_url(), content_type));
+        basePtr = std::make_unique<WriterTask>(WriterTask(socket_id, 0, get_buffer_postion(), std::stoi(header_map["Content-Length"]), std::forward<std::string>(buffer), filename_to_write, " ", file_boundry));
     }
     else if(request_map["method"] == "PUT")
     {        
-        std::cout<<"In PUT method \n";
-        //respond_type_put(socket_id);
-        basePtr = std::make_unique<WriterTask>(WriterTask(socket_id, 0, get_buffer_postion(), std::stoi(header_map["Content-Length"]), std::forward<std::string>(buffer), filename_to_write, " "));
+        basePtr = std::make_unique<WriterTask>(WriterTask(socket_id, 0, get_buffer_postion(), std::stoi(header_map["Content-Length"]), std::forward<std::string>(buffer), filename_to_write, " ", file_boundry));
     }
-        std::cout<<"Ended respond function: "<<request_map["method"]<<std::endl;
-
 
 }
 
-std::streampos HTTPRequest::get_buffer_postion()
+int HTTPRequest::get_buffer_postion()
 {
-    return ss.tellg();
+    return int(ss.tellg());
 }
 
 std::string HTTPRequest::get_url()
