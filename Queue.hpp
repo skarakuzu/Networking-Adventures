@@ -1,5 +1,5 @@
-#ifndef QUEUE_HPP
-#define QUEUE_HPP
+#ifndef QUEUE_HPP_
+#define QUEUE_HPP_
 
 #include <condition_variable>
 #include <future>
@@ -31,4 +31,4 @@ public:
   }
 };
 
-#endif
+#endif // QUEUE_HPP_

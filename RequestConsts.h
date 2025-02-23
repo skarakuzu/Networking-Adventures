@@ -1,5 +1,5 @@
-#ifndef REQUESTCONSTS_HPP
-#define REQUESTCONSTS_HPP
+#ifndef REQUESTCONSTS_HPP_
+#define REQUESTCONSTS_HPP_
 
 #include <array>
 #include <map>
@@ -39,4 +39,4 @@ static constexpr std::array<std::string_view, 5> responses = {
     "HTTP/1.1 400 Bad request \r\n", "HTTP/1.1 404 File not found \r\n",
     "HTTP/1.1 500 Internal Server error \r\n"};
 
-#endif
+#endif // REQUESTCONSTS_HPP_

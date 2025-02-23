@@ -1,5 +1,5 @@
-#ifndef THREADPOOL_HPP
-#define THREADPOOL_HPP
+#ifndef THREADPOOL_HPP_
+#define THREADPOOL_HPP_
 
 #include <condition_variable>
 #include <future>
@@ -44,4 +44,4 @@ public:
   }
 };
 
-#endif
+#endif // THREADPOOL_HPP_

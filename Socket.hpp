@@ -1,5 +1,5 @@
-#ifndef SOCKET_HPP
-#define SOCKET_HPP
+#ifndef SOCKET_HPP_
+#define SOCKET_HPP_
 
 #include <csignal>
 #include <iostream>
@@ -37,4 +37,4 @@ public:
   ~Socket();
 };
 
-#endif
+#endif // SOCKET_HPP_

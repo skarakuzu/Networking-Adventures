@@ -1,5 +1,5 @@
-#ifndef SERVER_HPP
-#define SERVER_HPP
+#ifndef SERVER_HPP_
+#define SERVER_HPP_
 
 #include "HTTPRequest.hpp"
 #include "Socket.hpp"
@@ -33,4 +33,4 @@ public:
 
   bool get_interrupt_stat();
 };
-#endif
+#endif // SERVER_HPP_

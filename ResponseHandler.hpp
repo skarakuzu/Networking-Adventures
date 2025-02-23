@@ -1,5 +1,5 @@
-#ifndef RESPONSEHANDLER_HPP
-#define RESPONSEHANDLER_HPP
+#ifndef RESPONSEHANDLER_HPP_
+#define RESPONSEHANDLER_HPP_
 
 #include "RequestConsts.h"
 #include <fstream>
@@ -167,4 +167,4 @@ struct ReaderTask : public BaseTask {
   }
 };
 
-#endif
+#endif // RESPONSEHANDLER_HPP_

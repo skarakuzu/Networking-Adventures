@@ -1,5 +1,5 @@
-#ifndef HTTPREQUEST_HPP
-#define HTTPREQUEST_HPP
+#ifndef HTTPREQUEST_HPP_
+#define HTTPREQUEST_HPP_
 
 #include <algorithm>
 #include <array>
@@ -9,8 +9,8 @@
 #include <sstream>
 #include <string_view>
 
-#include "RequestConsts.h"
-#include "ResponseHandler.hpp"
+#include "./RequestConsts.h"
+#include "./ResponseHandler.hpp"
 
 class HTTPRequest {
   void parse_body(std::string &str,
@@ -65,4 +65,4 @@ public:
   */
 };
 
-#endif
+#endif // HTTPREQUEST_HPP_
