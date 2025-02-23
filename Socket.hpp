@@ -1,40 +1,40 @@
 #ifndef SOCKET_HPP
 #define SOCKET_HPP
 
-#include<stdio.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
-#include<unistd.h>
-#include<iostream>
 #include <csignal>
+#include <iostream>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
-class Socket{
-    int socket_fd;
-    struct sockaddr_in address;
+class Socket {
+  int socket_fd;
+  struct sockaddr_in address;
 
 public:
-    Socket() = delete;
-    
-    // Copy Constructor and copy assignemt not allowed
-    Socket(Socket& other) = delete;
-    Socket& operator=(Socket& other) = delete;
+  Socket() = delete;
 
-    // Allow Move constructor and move assignment
-    Socket(Socket&& other) noexcept;//  = default;
-    Socket& operator=(Socket&& other) noexcept;// = default;
+  // Copy Constructor and copy assignemt not allowed
+  Socket(Socket &other) = delete;
+  Socket &operator=(Socket &other) = delete;
 
-    Socket(int domain, int service, int protocol, u_short port, u_long interface);
+  // Allow Move constructor and move assignment
+  Socket(Socket &&other) noexcept;            //  = default;
+  Socket &operator=(Socket &&other) noexcept; // = default;
 
-    int get_socket_fd();
-    struct sockaddr_in get_address();
+  Socket(int domain, int service, int protocol, u_short port, u_long interface);
 
-    int bind_socket();
-    int connect_socket();
-    int listen_socket(int backlog);
-    int accept_connection();
-    int close_socket();
+  int get_socket_fd();
+  struct sockaddr_in get_address();
 
-    ~Socket();
+  int bind_socket();
+  int connect_socket();
+  int listen_socket(int backlog);
+  int accept_connection();
+  int close_socket();
+
+  ~Socket();
 };
 
 #endif
