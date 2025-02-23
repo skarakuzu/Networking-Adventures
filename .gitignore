@@ -24,7 +24,7 @@ bin/
 *.a
 *.dll
 *.lib
-server
+main
 
 # IDE-specific files
 .vscode/
